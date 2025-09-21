@@ -4,19 +4,19 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{E9C7FDCE-D52A-8D73-7EB0-C5296AF258F6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{21EB8090-0D4E-1035-B6D3-48EBA215DCB7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Application Resource Files">
       <UniqueIdentifier>{D4D62349-C0E6-CF19-29A0-343815CFBEB2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Header Files">
+      <UniqueIdentifier>{21EB8090-0D4E-1035-B6D3-48EBA215DCB7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\game.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\raygui.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

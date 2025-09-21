@@ -6,10 +6,11 @@
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
 
+/* THIS IS WEEK 1 CODE
+
 const unsigned int TARGET_FPS = 50;
 float time = 0;
 float dt;
-
 
 float x = 500;
 float y = 500;
@@ -50,4 +51,35 @@ int main()
 
     CloseWindow();
     return 0;
+} */
+
+
+// THIS IS WEEK 2 CODE
+const unsigned int TARGET_FPS = 60;
+
+void Update()
+{
+    // Update your variables here
+}
+void Draw()
+{
+	BeginDrawing();
+	ClearBackground(BLACK);
+    DrawText("Rhieyanne Fajardo: 101554981", 10, 80, 20, BLUE);
+    DrawText(TextFormat("FPS: %02i", GetFPS()), 10, 10, 20, LIME);
+	EndDrawing();
+}
+
+
+int main()
+{
+	InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");
+    SetTargetFPS(TARGET_FPS);
+    while (!WindowShouldClose())
+    {
+        //Update();
+        Draw();
+    }
+	CloseWindow();
+	return 0;
 }

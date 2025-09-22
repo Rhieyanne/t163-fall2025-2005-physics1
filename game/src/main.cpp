@@ -56,17 +56,41 @@ int main()
 
 // THIS IS WEEK 2 CODE
 const unsigned int TARGET_FPS = 60;
+float dt = 1.0f / TARGET_FPS;
+
+float time;
+float x = 500;
+float y = 500;
+float frequency = 1;
+float amplitude = 100;
+
+float speed = 100;
+float angle = 30;
 
 void Update()
 {
-    // Update your variables here
+	dt = 1.0f / TARGET_FPS;
+    time += dt;
+	x = x + (-sin(time * frequency)) * frequency * amplitude * dt;
+	y = y + (cos(time * frequency)) * frequency * amplitude * dt;
 }
 void Draw()
-{
+{   
+    
 	BeginDrawing();
 	ClearBackground(BLACK);
-    DrawText("Rhieyanne Fajardo: 101554981", 10, 80, 20, BLUE);
+    DrawText("Rhieyanne Fajardo: 101554981", 10, GetScreenHeight() - 20 - 10, 20, WHITE);
     DrawText(TextFormat("FPS: %02i", GetFPS()), 10, 10, 20, LIME);
+	// GUI slider bars
+	GuiSliderBar(Rectangle{ 10, 40, 200, 20 }, "", TextFormat("Speed: %.0f", speed), &speed, -100, 1000);
+    GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180);
+
+    //Drawing the Line
+    Vector2 startPos = { 200, GetScreenHeight() - 200 };
+	Vector2 velocity = { cos(angle * DEG2RAD) * speed, -sin(angle * DEG2RAD) * speed};
+
+	DrawLineEx(startPos, startPos + velocity, 3, BLUE);
+
 	EndDrawing();
 }
 
@@ -77,7 +101,7 @@ int main()
     SetTargetFPS(TARGET_FPS);
     while (!WindowShouldClose())
     {
-        //Update();
+        Update();
         Draw();
     }
 	CloseWindow();

@@ -57,7 +57,6 @@ int main()
 // THIS IS WEEK 2 CODE
 const unsigned int TARGET_FPS = 60;
 float dt = 1.0f / TARGET_FPS;
-
 float time;
 
 float speed = 100;
@@ -71,17 +70,16 @@ Vector2 gravityAcceleration = { 0, 100 };
 
 void Update()
 {
-	dt = 1.0f / TARGET_FPS;
-    time += dt;
-	x = x + (-sin(time * frequency)) * frequency * amplitude * dt;
-	y = y + (cos(time * frequency)) * frequency * amplitude * dt;
-
-    if(IsKeyPressed(KEY_SPACE))
+	// dt = 1.0f / TARGET_FPS;
+    // time += dt;
+    /* WORK IN PROGRESSif (IsKeyPressed(KEY_SPACE))
     {
         //Drawing the Line
         position = { positionX, (float)GetScreenHeight() - positionY };
         velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
-	}
+    }
+
+    /*position += position + velocity * dt;*/
 }
 void Draw()
 {   
@@ -99,7 +97,7 @@ void Draw()
 
     //Drawing the Line
     Vector2 startPos = { positionX, GetScreenHeight() - positionY };
-    Vector2 velocity = { cos(angle * DEG2RAD) * speed, -sin(angle * DEG2RAD) * speed };
+    Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
 

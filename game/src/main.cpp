@@ -66,6 +66,12 @@ float amplitude = 100;
 
 float speed = 100;
 float angle = 30;
+float positionX = 200;
+float positionY = 200;
+
+Vector2 velocity;
+Vector2 position;
+Vector2 gravityAcceleration = { 0, 100 };
 
 void Update()
 {
@@ -73,6 +79,13 @@ void Update()
     time += dt;
 	x = x + (-sin(time * frequency)) * frequency * amplitude * dt;
 	y = y + (cos(time * frequency)) * frequency * amplitude * dt;
+
+    if(IsKeyPressed(KEY_SPACE))
+    {
+        //Drawing the Line
+        position = { positionX, (float)GetScreenHeight() - positionY };
+        velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
+	}
 }
 void Draw()
 {   
@@ -83,11 +96,13 @@ void Draw()
     DrawText(TextFormat("FPS: %02i", GetFPS()), 10, 10, 20, LIME);
 	// GUI slider bars
 	GuiSliderBar(Rectangle{ 10, 40, 200, 20 }, "", TextFormat("Speed: %.0f", speed), &speed, -100, 1000);
-    GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180);
+    GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180); 
+    GuiSliderBar(Rectangle{ 10, 80, 200, 20 }, "", TextFormat("Position X: %.0f", positionX), &positionX, 0, 300);
+    GuiSliderBar(Rectangle{ 10, 100, 200, 20 }, "", TextFormat("Position Y: %.0f", positionY), &positionY, 0, 300);
 
     //Drawing the Line
-    Vector2 startPos = { 200, GetScreenHeight() - 200 };
-	Vector2 velocity = { cos(angle * DEG2RAD) * speed, -sin(angle * DEG2RAD) * speed};
+    Vector2 startPos = { positionX, GetScreenHeight() - positionY };
+    Vector2 velocity = { cos(angle * DEG2RAD) * speed, -sin(angle * DEG2RAD) * speed };
 
 	DrawLineEx(startPos, startPos + velocity, 3, BLUE);
 

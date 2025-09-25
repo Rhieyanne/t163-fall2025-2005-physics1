@@ -8,6 +8,14 @@ using namespace std;
 
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
+//Default global values
+const unsigned int TARGET_FPS = 60;
+float speed = 100;
+float angle = 30;
+float positionX = 200;
+float positionY = 200;
+
+
 struct PhysicsBody { //Declare PhysicsBody
     Vector2 position; 
     Vector2 velocity;
@@ -26,48 +34,41 @@ public:
 
 
     PhysicsSim(float dt, float time, Vector2 gravityAcceleration = { 0, 0 }) : dt(dt), time(time), gravityAcceleration(gravityAcceleration){}
+    // FUNCTIONS
 
-	void addBall(const PhysicsBody& ball) {
-		balls.push_back(ball);
-	}
-
-        void Update(){
-        dt = 1.0f / TARGET_FPS;
-        for (auto& ball : balls) {
-            //Acceleration changes velocity over time.
-            // accel = delta velocity / time
-            // delta velocity = accel * time
-            // OG CODE: velocity += gravityAcceleration * dt;
+    //ADD BALL
+	void addBall(const PhysicsBody& ball) {balls.push_back(ball);}
+    //CLEAR BALL
+	void clearBalls() { balls.clear(); }
+    //UPDATE BALL
+    void Update(){
+    for (auto& ball : balls) {
+    //Acceleration changes velocity over time.
+    // accel = delta velocity / time
+    // delta velocity = accel * time
+    // OG CODE: velocity += gravityAcceleration * dt;
         
-			ball.velocity.x = gravityAcceleration.x * dt; 
-			ball.velocity.y = gravityAcceleration.y * dt;
+	ball.velocity.x = gravityAcceleration.x * dt; 
+	ball.velocity.y = gravityAcceleration.y * dt;
 
-            //Velocity changes positiions over time. 
-            // Velocity = dispalcement / time
-            // Displacement = velocity * time 
-            // OG CODE: position += velocity * dt;
+    //Velocity changes positiions over time. 
+    // Velocity = dispalcement / time
+    // Displacement = velocity * time 
+    // OG CODE: position += velocity * dt;
 
-			ball.position.x += ball.velocity.x * dt;
-			ball.position.y += ball.velocity.y * dt;
+	ball.position.x += ball.velocity.x * dt;
+	ball.position.y += ball.velocity.y * dt;
     };
 };
+// Why doesnt this work?
+PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
 
-//Default global values
-const unsigned int TARGET_FPS = 60;
-float speed = 100;
-float angle = 30;
-float positionX = 200;
-float positionY = 200;
+void BallUpdate() {
+    if(IsKeyPressed(KEY_SPACE)) {
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
+	}
+}
 
-PhysicsSim sim({ float = 1.0f / TARGET_FPS }, float = 0, Vector2 = { 0, 0 });
-Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
-
-/*    // Can we try putting iskeypressed in here?
-    if (IsKeyPressed(KEY_SPACE)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, 0.1f, 1.0f));
-        sim.gravityAcceleration = { 0, gravityAcceleration.y };
-        sim.Update();
-	}*/
   
 void Draw()
 {   
@@ -78,6 +79,8 @@ void Draw()
     DrawText(TextFormat("FPS: %02i", GetFPS()), 10, 10, 20, LIME);
     
 	// STEP2: ADJUST AND CONFIGURE
+    
+    
     // GUI slider bars
 	GuiSliderBar(Rectangle{ 10, 40, 200, 20 }, "", TextFormat("Speed: %.0f", speed), &speed, -100, 1000);
     GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180); 
@@ -91,8 +94,9 @@ void Draw()
     Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 
 	//Drawing the Circle
-    for (auto& ball : sim.ball) {
-        DrawCircle(ball.position, 10, BLUE);
+    //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
+    for (auto& ball : ball) {
+        DrawCircleV(ball.position, 10, BLUE);
     }
 
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
@@ -101,6 +105,7 @@ void Draw()
 	EndDrawing();
 }
 
+void 
 
 int main()
 {

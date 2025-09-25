@@ -91,7 +91,7 @@ void Draw()
     Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 
 	//Drawing the Circle
-	DrawCircle(body.position, 10, BLUE);
+	DrawCircle(ball.position, 10, BLUE);
 
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
 

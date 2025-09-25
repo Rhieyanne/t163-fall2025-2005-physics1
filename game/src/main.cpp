@@ -45,8 +45,8 @@ public:
             // delta velocity = accel * time
             // OG CODE: velocity += gravityAcceleration * dt;
         
-			ball.velocity.x = gravityAcceleration * dt; // Apply gravity to velocity
-			ball.velocity.y = gravityAcceleration * dt;
+			ball.velocity.x = gravityAcceleration.x * dt; // Apply gravity to velocity
+			ball.velocity.y = gravityAcceleration.y * dt;
     };
 };
 

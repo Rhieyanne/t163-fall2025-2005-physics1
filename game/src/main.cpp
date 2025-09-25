@@ -15,46 +15,45 @@ struct PhysicsBody { //Declare PhysicsBody
     }
 };
 
-/*class PhysicsSim {
+class PhysicsSim {
+public:
     float dt = 1.0f / TARGET_FPS;
     float time;
-    float gravity
-};*/
+    Vector2 gravityAcceleration = { 0, 100 };
+
+        void Update(){
+        dt = 1.0f / TARGET_FPS;
+        time += dt;
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            //Drawing the Line
+            position = { positionX, (float)GetScreenHeight() - positionY };
+            velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
+        }
+
+        //Velocity changes positiions over time. 
+        // Velocity = dispalcement / time
+        // Displacement = velocity * time 
+        position += velocity * dt;
+
+        //Acceleration changes velocity over time.
+        // accel = delta velocity / time
+        // delta velocity = accel * time
+        velocity += gravityAcceleration * dt;
+    };
+};
 
 const unsigned int TARGET_FPS = 60;
-float dt = 1.0f / TARGET_FPS;
-float time;
+
 
 float speed = 100;
 float angle = 30;
 float positionX = 200;
 float positionY = 200;
 
-Vector2 velocity;
-Vector2 position;
-Vector2 gravityAcceleration = { 0, 100 };
 
-void Update()
-{
-	 dt = 1.0f / TARGET_FPS;
-    time += dt;
-    if (IsKeyPressed(KEY_SPACE))
-    {
-        //Drawing the Line
-        position = { positionX, (float)GetScreenHeight() - positionY };
-        velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
-    }
 
-    //Velocity changes positiions over time. 
-	// Velocity = dispalcement / time
-	// Displacement = velocity * time 
-	position += velocity * dt;
-    
-	//Acceleration changes velocity over time.
-	// accel = delta velocity / time
-	// delta velocity = accel * time
-	velocity += gravityAcceleration * dt;
-}
+
   
 void Draw()
 {   

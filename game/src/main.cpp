@@ -41,7 +41,7 @@ public:
     //CLEAR BALL
 	void clearBalls() { balls.clear(); }
     //UPDATE BALL
-    void Update(){
+    void UpdateBall(){
     for (auto& ball : balls) {
     //Acceleration changes velocity over time.
     // accel = delta velocity / time
@@ -63,7 +63,7 @@ public:
 // Why doesnt this work?
 PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
 
-void BallUpdate() {
+void ballSpawn() {
     if(IsKeyPressed(KEY_SPACE)) {
         sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
 	}
@@ -105,16 +105,16 @@ void Draw()
 	EndDrawing();
 }
 
-void 
-
-int main()
-{
-	InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");
+int main() {
+    InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");
     SetTargetFPS(TARGET_FPS);
-    while (!WindowShouldClose())
-    {
+
+    while (!WindowShouldClose()) {
+        ballSpawn();
+        sim.UpdateBall();
         Draw();
     }
-	CloseWindow();
-	return 0;
+
+    CloseWindow();
+    return 0;
 }

@@ -62,30 +62,30 @@ float positionY = 200;
 PhysicsSim sim({ float = 1.0f / TARGET_FPS }, float = 0, Vector2 = { 0, 0 });
 Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 
-
-  
-void Draw()
-{   
-    
-	BeginDrawing();
-	ClearBackground(BLACK);
-    DrawText("Rhieyanne Fajardo: 101554981", 10, GetScreenHeight() - 20 - 10, 20, WHITE);
-    DrawText(TextFormat("FPS: %02i", GetFPS()), 10, 10, 20, LIME);
-
-    // Can we try putting iskeypressed in here?
+/*    // Can we try putting iskeypressed in here?
     if (IsKeyPressed(KEY_SPACE)) {
         sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, 0.1f, 1.0f));
         sim.gravityAcceleration = { 0, gravityAcceleration.y };
         sim.Update();
-	}
+	}*/
+  
+void Draw()
+{   
+	// STEP1: Begin drawing and initialize the screen
+	BeginDrawing();
+	ClearBackground(BLACK);
+    DrawText("Rhieyanne Fajardo: 101554981", 10, GetScreenHeight() - 20 - 10, 20, WHITE);
+    DrawText(TextFormat("FPS: %02i", GetFPS()), 10, 10, 20, LIME);
     
-	// GUI slider bars
+	// STEP2: ADJUST AND CONFIGURE
+    // GUI slider bars
 	GuiSliderBar(Rectangle{ 10, 40, 200, 20 }, "", TextFormat("Speed: %.0f", speed), &speed, -100, 1000);
     GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180); 
     GuiSliderBar(Rectangle{ 10, 80, 200, 20 }, "", TextFormat("Position X: %.0f", positionX), &positionX, 0, 300);
     GuiSliderBar(Rectangle{ 10, 100, 200, 20 }, "", TextFormat("Position Y: %.0f", positionY), &positionY, 0, 300);
     GuiSliderBar(Rectangle{ 10, 140, 200, 20 }, "", TextFormat("Gravity Acceleration: %.0f", gravityAcceleration.y), &gravityAcceleration.y, -300, 300);
 
+	// STEP3: SIMULATION AND DRAWING BALL AND LINE
     //Drawing the Line
     Vector2 startPos = { positionX, GetScreenHeight() - positionY };
     Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
@@ -97,6 +97,7 @@ void Draw()
 
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
 
+	//STEP4: END DRAWING
 	EndDrawing();
 }
 

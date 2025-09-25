@@ -3,6 +3,9 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include "game.h"
+#include <vector>
+using namespace std;
+
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
 struct PhysicsBody { //Declare PhysicsBody
@@ -18,28 +21,32 @@ class PhysicsSim {
 public:
     float dt = 1.0f / TARGET_FPS;
     float time;
-    Vector2 gravityAcceleration = { 0, 100 };
-    PhysicsSim(float dt, float time, Vector2 gravityAcceleration = { 0, 100 }) : dt(dt), time(time), gravityAcceleration(gravityAcceleration){}
+    Vector2 gravityAcceleration;
+	vector<PhysicsBody> balls;
+
+
+    PhysicsSim(float dt, float time, Vector2 gravityAcceleration = { 0, 0 }) : dt(dt), time(time), gravityAcceleration(gravityAcceleration){}
+
+	void addBall(const PhysicsBody& ball) {
+		balls.push_back(ball);
+	}
 
         void Update(){
         dt = 1.0f / TARGET_FPS;
-        time += dt;
-        if (IsKeyPressed(KEY_SPACE))
-        {
-            //Drawing the Line
-            position = { positionX, (float)GetScreenHeight() - positionY };
-            velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
-        }
+        for (auto& ball : balls) {
 
-        //Velocity changes positiions over time. 
-        // Velocity = dispalcement / time
-        // Displacement = velocity * time 
-        position += velocity * dt;
+            //Velocity changes positiions over time. 
+            // Velocity = dispalcement / time
+            // Displacement = velocity * time 
+            // OG CODE: position += velocity * dt;
 
-        //Acceleration changes velocity over time.
-        // accel = delta velocity / time
-        // delta velocity = accel * time
-        velocity += gravityAcceleration * dt;
+            //Acceleration changes velocity over time.
+            // accel = delta velocity / time
+            // delta velocity = accel * time
+            // OG CODE: velocity += gravityAcceleration * dt;
+        
+			ball.velocity.x = gravityAcceleration * dt; // Apply gravity to velocity
+			ball.velocity.y = gravityAcceleration * dt;
     };
 };
 
@@ -85,7 +92,24 @@ void Draw()
 
 int main()
 {
-	PhysicsBody body;
+	
+    //Press space to launch the object, we're gonna create a struct for the physics body and a class for the physics simulation 
+    if (IsKeyPressed(KEY_SPACE))
+    /* {
+        //Drawing the Line
+        position = { positionX, (float)GetScreenHeight() - positionY };
+        velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
+    }
+
+    //Velocity changes positiions over time. 
+    // Velocity = dispalcement / time
+    // Displacement = velocity * time 
+    position += velocity * dt;
+
+    //Acceleration changes velocity over time.
+    // accel = delta velocity / time
+    // delta velocity = accel * time
+    velocity += gravityAcceleration * dt;}*/
 
 
 	InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");

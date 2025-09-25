@@ -5,6 +5,21 @@
 #include "game.h"
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
+struct PhysicsBody { //Declare PhysicsBody
+    Vector2 position; // Declare member types
+    Vector2 velocity;
+    float drag;
+    float mass;
+
+    PhysicsBody(Vector2 position = { 0, 0 }, Vector2 velocity = { 0, 0 }, float drag = 0.1f, float mass = 1.0f): position(position), velocity(velocity), drag(drag), mass(mass) {
+    }
+};
+
+/*class PhysicsSim {
+    float dt = 1.0f / TARGET_FPS;
+    float time;
+    float gravity
+};*/
 
 const unsigned int TARGET_FPS = 60;
 float dt = 1.0f / TARGET_FPS;
@@ -71,6 +86,9 @@ void Draw()
 
 int main()
 {
+	PhysicsBody body;
+
+
 	InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");
     SetTargetFPS(TARGET_FPS);
     while (!WindowShouldClose())

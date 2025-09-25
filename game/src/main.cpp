@@ -9,7 +9,7 @@ using namespace std;
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
 struct PhysicsBody { //Declare PhysicsBody
-    Vector2 position; // Declare member types
+    Vector2 position; 
     Vector2 velocity;
     float drag;
     float mass;
@@ -59,7 +59,8 @@ float angle = 30;
 float positionX = 200;
 float positionY = 200;
 
-
+PhysicsSim sim({ float = 1.0f / TARGET_FPS }, float = 0, Vector2 = { 0, 0 });
+Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 
 
   
@@ -73,8 +74,7 @@ void Draw()
 
     // Can we try putting iskeypressed in here?
     if (IsKeyPressed(KEY_SPACE)) {
-        PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 0 });
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, 0.1f, 1.0f));
         sim.gravityAcceleration = { 0, gravityAcceleration.y };
         sim.Update();
 	}
@@ -91,7 +91,9 @@ void Draw()
     Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 
 	//Drawing the Circle
-	DrawCircle(ball.position, 10, BLUE);
+    for (auto& ball : sim.ball) {
+        DrawCircle(ball.position, 10, BLUE);
+    }
 
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
 

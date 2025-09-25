@@ -5,10 +5,9 @@
 #include "game.h"
 #include <vector>
 using namespace std;
-
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
-//Default global values
+/*//Default global values
 const unsigned int TARGET_FPS = 60;
 float speed = 100;
 float angle = 30;
@@ -117,5 +116,4 @@ int main() {
 
     CloseWindow();
     return 0;
-}
-
+}*/

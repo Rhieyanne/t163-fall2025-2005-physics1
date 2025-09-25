@@ -48,8 +48,8 @@ public:
     // delta velocity = accel * time
     // OG CODE: velocity += gravityAcceleration * dt;
         
-	ball.velocity.x = gravityAcceleration.x * dt; 
-	ball.velocity.y = gravityAcceleration.y * dt;
+	ball.velocity.x += gravityAcceleration.x * dt; 
+	ball.velocity.y += gravityAcceleration.y * dt;
 
     //Velocity changes positiions over time. 
     // Velocity = dispalcement / time
@@ -95,7 +95,7 @@ void Draw()
 
 	//Drawing the Circle
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
-    for (auto& ball : balls) {
+    for (auto& ball : sim.balls) {
         DrawCircleV(ball.position, 10, BLUE);
     }
 

@@ -34,25 +34,26 @@ public:
         void Update(){
         dt = 1.0f / TARGET_FPS;
         for (auto& ball : balls) {
+            //Acceleration changes velocity over time.
+            // accel = delta velocity / time
+            // delta velocity = accel * time
+            // OG CODE: velocity += gravityAcceleration * dt;
+        
+			ball.velocity.x = gravityAcceleration.x * dt; 
+			ball.velocity.y = gravityAcceleration.y * dt;
 
             //Velocity changes positiions over time. 
             // Velocity = dispalcement / time
             // Displacement = velocity * time 
             // OG CODE: position += velocity * dt;
 
-            //Acceleration changes velocity over time.
-            // accel = delta velocity / time
-            // delta velocity = accel * time
-            // OG CODE: velocity += gravityAcceleration * dt;
-        
-			ball.velocity.x = gravityAcceleration.x * dt; // Apply gravity to velocity
-			ball.velocity.y = gravityAcceleration.y * dt;
+			ball.position.x += ball.velocity.x * dt;
+			ball.position.y += ball.velocity.y * dt;
     };
 };
 
+//Default global values
 const unsigned int TARGET_FPS = 60;
-
-
 float speed = 100;
 float angle = 30;
 float positionX = 200;
@@ -70,6 +71,14 @@ void Draw()
     DrawText("Rhieyanne Fajardo: 101554981", 10, GetScreenHeight() - 20 - 10, 20, WHITE);
     DrawText(TextFormat("FPS: %02i", GetFPS()), 10, 10, 20, LIME);
 
+    // Can we try putting iskeypressed in here?
+    if (IsKeyPressed(KEY_SPACE)) {
+        PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 0 });
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
+        sim.gravityAcceleration = { 0, gravityAcceleration.y };
+        sim.Update();
+	}
+    
 	// GUI slider bars
 	GuiSliderBar(Rectangle{ 10, 40, 200, 20 }, "", TextFormat("Speed: %.0f", speed), &speed, -100, 1000);
     GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180); 
@@ -82,7 +91,7 @@ void Draw()
     Vector2 velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 
 	//Drawing the Circle
-	DrawCircle(position.x, position.y, 15, RED);
+	DrawCircle(body.position, 10, BLUE);
 
 	DrawLineEx(startPos, startPos + velocity, 3, RED);
 
@@ -92,31 +101,10 @@ void Draw()
 
 int main()
 {
-	
-    //Press space to launch the object, we're gonna create a struct for the physics body and a class for the physics simulation 
-    if (IsKeyPressed(KEY_SPACE))
-    /* {
-        //Drawing the Line
-        position = { positionX, (float)GetScreenHeight() - positionY };
-        velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
-    }
-
-    //Velocity changes positiions over time. 
-    // Velocity = dispalcement / time
-    // Displacement = velocity * time 
-    position += velocity * dt;
-
-    //Acceleration changes velocity over time.
-    // accel = delta velocity / time
-    // delta velocity = accel * time
-    velocity += gravityAcceleration * dt;}*/
-
-
 	InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");
     SetTargetFPS(TARGET_FPS);
     while (!WindowShouldClose())
     {
-        Update();
         Draw();
     }
 	CloseWindow();

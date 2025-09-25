@@ -71,6 +71,28 @@ void SpawnBall() {
     if (IsKeyPressed(KEY_SPACE)) {
         sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
     }
+
+    // Now to do the angles and different parameters presets
+    
+	// ANGLE 0 DEGREES
+    if (IsKeyPressed(KEY_ONE)) {
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(0 * DEG2RAD) * speed, (float)-sin(0 * DEG2RAD) * speed }, 0.1f, 1.0f));
+    }
+
+    // ANGLE 45 DEGREES
+    if (IsKeyPressed(KEY_TWO)) {
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(45 * DEG2RAD) * speed, (float)-sin(45 * DEG2RAD) * speed }, 0.1f, 1.0f));
+    }
+
+    // ANGLE 60 DEGREES
+    if (IsKeyPressed(KEY_THREE)) {
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(60 * DEG2RAD) * speed, (float)-sin(60 * DEG2RAD) * speed }, 0.1f, 1.0f));
+    }
+
+	// ANGLE 90 DEGREES
+    if (IsKeyPressed(KEY_FOUR)) {
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(90 * DEG2RAD) * speed, (float)-sin(90 * DEG2RAD) * speed }, 0.1f, 1.0f));
+    }
 }
 
 // Draw Function

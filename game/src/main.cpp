@@ -71,6 +71,16 @@ void SpawnBall() {
     if (IsKeyPressed(KEY_SPACE)) {
         sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
     }
+    
+	// Clears all balls when C is pressed
+    if (IsKeyPressed(KEY_C)) {
+        sim.clearBalls();
+	}
+
+	// Holding down the space bar continuously spawns balls
+    if (IsKeyDown(KEY_SPACE)) {
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
+	}
 
     // Now to do the angles and different parameters presets
     

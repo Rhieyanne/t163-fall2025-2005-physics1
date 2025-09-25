@@ -11,8 +11,7 @@ struct PhysicsBody { //Declare PhysicsBody
     float drag;
     float mass;
 
-    PhysicsBody(Vector2 position = { 0, 0 }, Vector2 velocity = { 0, 0 }, float drag = 0.1f, float mass = 1.0f): position(position), velocity(velocity), drag(drag), mass(mass) {
-    }
+    PhysicsBody(Vector2 position = { 0, 0 }, Vector2 velocity = { 0, 0 }, float drag = 0.1f, float mass = 1.0f): position(position), velocity(velocity), drag(drag), mass(mass) {}
 };
 
 class PhysicsSim {
@@ -20,6 +19,7 @@ public:
     float dt = 1.0f / TARGET_FPS;
     float time;
     Vector2 gravityAcceleration = { 0, 100 };
+    PhysicsSim(float dt, float time, Vector2 gravityAcceleration = { 0, 100 }) : dt(dt), time(time), gravityAcceleration(gravityAcceleration){}
 
         void Update(){
         dt = 1.0f / TARGET_FPS;

@@ -58,7 +58,7 @@ public:
 
 	ball.position.x += ball.velocity.x * dt;
 	ball.position.y += ball.velocity.y * dt;
-    };
+    }
 };
 // Why doesnt this work?
 PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
@@ -86,7 +86,7 @@ void Draw()
     GuiSliderBar(Rectangle{ 10, 60, 200, 20 }, "", TextFormat("Angle: %.0f", angle), &angle, -180, 180); 
     GuiSliderBar(Rectangle{ 10, 80, 200, 20 }, "", TextFormat("Position X: %.0f", positionX), &positionX, 0, 300);
     GuiSliderBar(Rectangle{ 10, 100, 200, 20 }, "", TextFormat("Position Y: %.0f", positionY), &positionY, 0, 300);
-    GuiSliderBar(Rectangle{ 10, 140, 200, 20 }, "", TextFormat("Gravity Acceleration: %.0f", gravityAcceleration.y), &gravityAcceleration.y, -300, 300);
+    GuiSliderBar(Rectangle{ 10, 140, 200, 20 }, "", TextFormat("Gravity Acceleration: %.0f", sim.gravityAcceleration.y), &sim.gravityAcceleration.y, -300, 300);
 
 	// STEP3: SIMULATION AND DRAWING BALL AND LINE
     //Drawing the Line
@@ -95,7 +95,7 @@ void Draw()
 
 	//Drawing the Circle
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
-    for (auto& ball : ball) {
+    for (auto& ball : balls) {
         DrawCircleV(ball.position, 10, BLUE);
     }
 
@@ -118,3 +118,4 @@ int main() {
     CloseWindow();
     return 0;
 }
+

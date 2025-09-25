@@ -7,6 +7,70 @@
 using namespace std;
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
+// Default Global Values
+const unsigned int TARGET_FPS = 60;
+float speed = 100;
+float angle = 30;
+float positionX = 200;
+float positionY = 200;
+
+// PhysicsBody Struct
+struct PhysicsBody { 
+    Vector2 position;
+    Vector2 velocity;
+    float drag;
+    float mass;
+
+    PhysicsBody(Vector2 position = { 0, 0 }, Vector2 velocity = { 0, 0 }, float drag = 0.1f, float mass = 1.0f) : position(position), velocity(velocity), drag(drag), mass(mass) {}
+};
+
+// PhysicsSim Class
+
+class PhysicsSim {
+public:
+    float dt = 1.0f / TARGET_FPS;
+    float time;
+    Vector2 gravityAcceleration;
+    vector<PhysicsBody> balls;
+
+
+    PhysicsSim(float dt, float time, Vector2 gravityAcceleration = { 0, 0 }) : dt(dt), time(time), gravityAcceleration(gravityAcceleration) {}
+    // FUNCTIONS
+
+    //ADD BALL
+    void addBall(const PhysicsBody& ball) { balls.push_back(ball); }
+    //CLEAR BALL
+    void clearBalls() { balls.clear(); }
+    //UPDATE BALL
+    void UpdateBall() {
+        for (auto& ball : balls) {
+            //Acceleration changes velocity over time.
+            // accel = delta velocity / time
+            // delta velocity = accel * time
+            // OG CODE: velocity += gravityAcceleration * dt;
+
+            ball.velocity.x += gravityAcceleration.x * dt;
+            ball.velocity.y += gravityAcceleration.y * dt;
+
+            //Velocity changes positiions over time. 
+            // Velocity = dispalcement / time
+            // Displacement = velocity * time 
+            // OG CODE: position += velocity * dt;
+
+            ball.position.x += ball.velocity.x * dt;
+            ball.position.y += ball.velocity.y * dt;
+          }
+        }
+    };
+
+PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
+
+
+
+
+
+
+
 /*//Default global values
 const unsigned int TARGET_FPS = 60;
 float speed = 100;

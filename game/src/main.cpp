@@ -42,6 +42,8 @@ struct PhysicsBody {
 // PhysicsSim Class
 
 class PhysicsSim {
+private:
+	unsigned int ballCount = 0;
 public:
     float dt = 1.0f / TARGET_FPS;
     float time;
@@ -49,12 +51,16 @@ public:
     vector<PhysicsBody> balls;
     Color randomColor;
 
+    
+
+
+
     PhysicsSim(
         float dt,
         float time,
         Vector2 gravityAcceleration = { 0, 0 },
-        Color randomColor = { rand() % 256, rand() % 256, rand() % 256, 255 }) :
-
+        Color randomColor = { static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256, 255) }) :
+        // https://stackoverflow.com/questions/60580647/narrowing-conversion-from-int-to-unsigned-char
 
         dt(dt),
         time(time),
@@ -65,7 +71,13 @@ public:
     // FUNCTIONS
 
     //ADD BALL
-    void addBall(PhysicsBody ball) { balls.push_back(ball); }
+    void addBall(PhysicsBody ball)
+    {
+		ball.name = to_string(ballCount);
+        balls.push_back(ball); 
+        ballCount++; 
+    }
+
     //CLEAR BALL
     void clearBalls() { balls.clear(); }
     //UPDATE BALL
@@ -97,7 +109,7 @@ PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
 // Spawn Ball Function
 void SpawnBall() {
     if (IsKeyPressed(KEY_SPACE)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
+        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f, { static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256, 255) }));
     }
     
 	// Clears all balls when C is pressed
@@ -161,7 +173,7 @@ void Draw()
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
     for (auto& ball : sim.balls) {
         DrawCircleV(ball.position, 10, BLUE);
-		DrawLineEx(position, position + velocity, 3, RED);
+		DrawLineEx(ball.position, ball.position + velocity, 1, RED);
     }
 
     DrawLineEx(startPos, startPos + velocity, 3, RED);

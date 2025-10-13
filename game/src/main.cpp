@@ -18,6 +18,11 @@ float positionY = 200;
 float prePosY = GetScreenHeight() - positionY;
 float veloX = (float)cos(angle * DEG2RAD) * speed;
 float veloY = (float)-sin(angle * DEG2RAD) * speed;
+float time;
+float dt;
+
+pWorld sim;
+
 
 // Notes on Polymorphism
 //We can use void draw() override, or we can use virtual void draw() = 0; pure virtual function
@@ -40,7 +45,6 @@ struct pMain // Parent Class
 
 	// Constructor
        pMain(
-
            // Vector2 
 		   Vector2 position = { 0, 0 },
 		   Vector2 velocity = { 0, 0 },
@@ -57,15 +61,12 @@ struct pMain // Parent Class
                /*[A]*/255
                // https://stackoverflow.com/questions/60580647/narrowing-conversion-from-int-to-unsigned-char
 		   }) :
-
-
            position(position),
            velocity(velocity),
            mass(mass),
            drag(drag),
            name(name),
 		   color(color){}
-
 	   // Virtual Draw function |  Virtual keyword is required to allow this function to be overridden
        virtual void draw()
        {
@@ -96,127 +97,101 @@ public:
 	}
 };
 
-
-
-
-// PhysicsSim Class
-
-class PhysicsSim {
+class pWorld {
 private:
-	unsigned int ballCount = 0;
+	unsigned int objCount = 0;
 public:
-    float dt = 1.0f / TARGET_FPS;
-    float time;
-    Vector2 gravityAcceleration;
-    vector<pMain> balls;
-	vector<pBox> boxes;
+    // Vector2
+	Vector2 gravityAcceleration;
+	vector<pMain*> objects; // All objects in physics world
+    vector<pBox> boxes;
+	vector<pCircle> circles;
 
-    
+	// Constructor
+    pWorld(Vector2 gravityAcceleration = { 0, 0 }) : gravityAcceleration(gravityAcceleration) {};
 
-
-
-    PhysicsSim(
-        float dt,
-        float time,
-        Vector2 gravityAcceleration = { 0, 0 }) :
-        
-
-        dt(dt),
-        time(time),
-        gravityAcceleration(gravityAcceleration){};
-
-
-    // FUNCTIONS
-
-    //ADD BALL
-    void addBall(pMain ball)
-    {
-		ball.name = to_string(ballCount);
-        balls.push_back(ball); 
-        ballCount++; 
+    // Functions
+    void addObject(pMain* obj) {
+		obj->name = to_string(objCount);
+        objects.push_back(obj);
+        objCount++;
     }
 
-    //CLEAR BALL
-    void clearBalls() { balls.clear(); }
-    //UPDATE BALL
-    void UpdateBall() {
-        for (auto& ball : balls) {
+    void updateObject() {
+        for (int i = 0; i < sim.objects.size(); i++) {
+			pMain* obj = sim.objects[i];
+            obj->velocity.x += gravityAcceleration.x * dt;
+            obj->velocity.y += gravityAcceleration.y * dt;
+            obj->position.x += obj->velocity.x * dt;
+            obj->position.y += obj->velocity.y * dt;
+
+			//OG CODE FOR REFERENCE
             //Acceleration changes velocity over time.
             // accel = delta velocity / time
             // delta velocity = accel * time
             // OG CODE: velocity += gravityAcceleration * dt;
-
-            ball.velocity.x += gravityAcceleration.x * dt;
-            ball.velocity.y += gravityAcceleration.y * dt;
-
+            // 
             //Velocity changes positiions over time. 
             // Velocity = dispalcement / time
             // Displacement = velocity * time 
             // OG CODE: position += velocity * dt;
-
-            ball.position.x += ball.velocity.x * dt;
-            ball.position.y += ball.velocity.y * dt;
-
-          }
-        }
-    };
-
-// PhysicsSim instance
-PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
-
-// Spawn Ball Function
-void SpawnBall() {
-    if (IsKeyPressed(KEY_SPACE)) {
-        //sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f, { static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256, 255) }));
-        sim.addBall(pMain(
-			{ positionX, prePosY},
-            { veloX, veloY}, 
-            0.1f, 
-            1.0f,
-			"Ball" + to_string(sim.balls.size() + 1),
-            { static_cast<unsigned char>(rand() % 256),
-              static_cast<unsigned char>(rand() % 256), 
-              static_cast<unsigned char>(rand() % 256), 
-              255 
-            }
-
-        
-        ));
+		}
     }
-    
-	// Clears all balls when C is pressed
-    if (IsKeyPressed(KEY_C)) {
-        sim.clearBalls();
+};
+
+void cleanupWorld() {
+    for (int i = 0; i < sim.objects.size(); i++) {
+        pMain* obj = sim.objects[i];
+        if (   obj->position.y > GetScreenHeight()
+			|| obj->position.y < 0
+			|| obj->position.x > GetScreenWidth()
+            || obj->position.x < 0 ) {
+            sim.objects.erase(sim.objects.begin() + i); // Remove from vector
+			i--; // Adjust index after erasing
+
+		}
 	}
+}
 
-	// Holding down the space bar continuously spawns balls
-    /*if (IsKeyPressed(KEY_SPACE)) {
-        sim.addBall(Physicsody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
-	}*/
+void update() 
+{
+    dt = 1.0f / TARGET_FPS;
+    time += dt;
 
-    // Now to do the angles and different parameters presets
-    
-	// ANGLE 0 DEGREES
-    if (IsKeyPressed(KEY_ONE)) {
-        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(0 * DEG2RAD) * speed, (float)-sin(0 * DEG2RAD) * speed }, 0.1f, 1.0f));
-    }
-
-    // ANGLE 45 DEGREES
-    if (IsKeyPressed(KEY_TWO)) {
-        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(45 * DEG2RAD) * speed, (float)-sin(45 * DEG2RAD) * speed }, 0.1f, 1.0f));
-    }
-
-    // ANGLE 60 DEGREES
-    if (IsKeyPressed(KEY_THREE)) {
-        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(60 * DEG2RAD) * speed, (float)-sin(60 * DEG2RAD) * speed }, 0.1f, 1.0f));
-    }
-
-	// ANGLE 90 DEGREES
-    if (IsKeyPressed(KEY_FOUR)) {
-        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(90 * DEG2RAD) * speed, (float)-sin(90 * DEG2RAD) * speed }, 0.1f, 1.0f));
+    cleanupWorld();
+    sim.updateObject();
+    if (IsKeyPressed(KEY_SPACE))
+    {
+		pCircle* newCircle = new pCircle(); // New keyword allocates memory on the heap (as opposed to the stack, where the data will be lost on exisiting scope)
+		newCircle->position = { positionX, GetScreenHeight() - positionY };
+		newCircle->velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
+        newCircle->radius;
+        newCircle->color;
+        sim.addObject(newCircle); 
     }
 }
 
+
+
+
+void spawnObject() {
+    if (IsKeyPressed(KEY_SPACE)) {
+        sim.addObject(new pMain(
+            { positionX, GetScreenHeight() - positionY },
+            { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed },
+            0.1f,
+            1.0f,
+            "Object" + to_string(sim.objects.size() + 1),
+            { static_cast<unsigned char>(rand() % 256),
+              static_cast<unsigned char>(rand() % 256),
+              static_cast<unsigned char>(rand() % 256),
+              255 }
+        ));
+    };
+};
+
+
+// Spawn Ball Function
 // Draw Function
 void Draw()
 {
@@ -253,6 +228,10 @@ void Draw()
 	// example, Circle.draw() should call the Circle draw function, Box.draw() should call the Box draw function
     DrawLineEx(startPos, startPos + velocity, 3, RED);
 
+    for (int i = 0; i < sim.objects.size(); i++)
+    {
+        sim.objects[i]->draw();
+    }
     //STEP4: END DRAWING
     EndDrawing();
 }
@@ -263,8 +242,8 @@ int main() {
     SetTargetFPS(TARGET_FPS);
 
     while (!WindowShouldClose()) {
-        SpawnBall();
-        sim.UpdateBall();
+        spawnObject();
+        sim.updateObject();
         Draw();
     }
 

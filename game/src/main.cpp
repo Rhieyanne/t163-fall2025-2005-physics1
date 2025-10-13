@@ -59,6 +59,7 @@ public:
 
             ball.position.x += ball.velocity.x * dt;
             ball.position.y += ball.velocity.y * dt;
+
           }
         }
     };

@@ -15,65 +15,90 @@ float speed = 100;
 float angle = 30;
 float positionX = 200;
 float positionY = 200;
+float prePosY = GetScreenHeight() - positionY;
+float veloX = (float)cos(angle * DEG2RAD) * speed;
+float veloY = (float)-sin(angle * DEG2RAD) * speed;
 
 // Notes on Polymorphism
 //We can use void draw() override, or we can use virtual void draw() = 0; pure virtual function
 // Overriding keyword makes sure we are actually overriding a base class function
 // if you are not, the compiler will throw an error
 // [Virtual on Main class], override on derived class
-// PhysicsBody Struct
-/*struct PhysicsBody {
-    Vector2 position;
-    Vector2 velocity;
-    float drag;
-    float mass = 1; // in kg
-	string name = "Ball";
-    Color randomColor;
-	// Color randomColor = {rand() % 256, rand() % 256, rand() % 256, 255};
-    PhysicsBody(
-        Vector2 position = { 0, 0 },
-        Vector2 velocity = { 0, 0 },
-        float drag = 0.1f,
-        float mass = 1.0f,
-        float radius = (rand() % 25) + 5,
-        Color randomColor = { static_cast<unsigned char>(rand() % 256),
-              static_cast<unsigned char>(rand() % 256),
-              static_cast<unsigned char>(rand() % 256),
-              255
-        }
-        ):
-        // https://stackoverflow.com/questions/60580647/narrowing-conversion-from-int-to-unsigned-char
-        position(position), 
-        velocity(velocity),
-        drag(drag), 
-        mass(mass),
-        radius(radius),
-        randomColor(randomColor) {}
-};*/
 
 struct pMain // Parent Class
 {
-	Vector2 position;
-	Vector2 velocity;
-}
+    // Vector2 
+       Vector2 position;
+       Vector2 velocity;
+    // Float 
+       float mass;
+       float drag;
+	// String 
+       string name;
+    // Color
+	   Color color;
+
+	// Constructor
+       pMain(
+
+           // Vector2 
+		   Vector2 position = { 0, 0 },
+		   Vector2 velocity = { 0, 0 },
+		   // Float
+		   float mass = 1.0f,
+		   float drag = 0.1f,
+		   // String
+		   string name = "Object",
+		   // Color
+           Color color = {
+               /*[R]*/static_cast<unsigned char>(rand() % 256),
+               /*[G]*/static_cast<unsigned char>(rand() % 256),
+               /*[B]*/static_cast<unsigned char>(rand() % 256),
+               /*[A]*/255
+               // https://stackoverflow.com/questions/60580647/narrowing-conversion-from-int-to-unsigned-char
+		   }) :
 
 
-class PhysicsBox : public PhysicsBox
+           position(position),
+           velocity(velocity),
+           mass(mass),
+           drag(drag),
+           name(name),
+		   color(color){}
+
+	   // Virtual Draw function |  Virtual keyword is required to allow this function to be overridden
+       virtual void draw()
+       {
+           DrawCircleV(position, 10, color);
+           DrawText(name.c_str(), position.x, position.y, 20, LIGHTGRAY);
+		   DrawLineEx(position, position + velocity, 1, color);
+       }
+       
+
+};
+
+class pBox : public pMain
 {
 public:
-	Vector2 position;
-	Vector2 velocity;
 	Vector2 Size; // x width, y height
-    float mass = 1;
-	string name = "Box";
-	Color color = RED;
 };
 
-class PhysicsCircle : public PhysicsBox
+class pCircle : public pMain
 {
 public:
-	float radius = 15;
+    float radius; // radius of circle in pixels
+
+    void draw() override // Override the parent draw function
+    {
+        DrawCircleV(position, radius, color);
+        DrawText(name.c_str(), position.x, position.y, radius * 2, LIGHTGRAY);
+        DrawLineEx(position, position + velocity, 1, color);
+	}
 };
+
+
+
+
 // PhysicsSim Class
 
 class PhysicsSim {
@@ -83,8 +108,8 @@ public:
     float dt = 1.0f / TARGET_FPS;
     float time;
     Vector2 gravityAcceleration;
-    vector<PhysicsBody> balls;
-	vector<PhysicsBox> boxes;
+    vector<pMain> balls;
+	vector<pBox> boxes;
 
     
 
@@ -104,7 +129,7 @@ public:
     // FUNCTIONS
 
     //ADD BALL
-    void addBall(PhysicsBody ball)
+    void addBall(pMain ball)
     {
 		ball.name = to_string(ballCount);
         balls.push_back(ball); 
@@ -143,18 +168,18 @@ PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
 void SpawnBall() {
     if (IsKeyPressed(KEY_SPACE)) {
         //sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f, { static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256, 255) }));
-        sim.addBall(PhysicsBody(
-			{ positionX, GetScreenHeight() - positionY }, 
-            { (float)cos(angle * DEG2RAD) * speed, 
-            (float)-sin(angle * DEG2RAD) * speed }, 
+        sim.addBall(pMain(
+			{ positionX, prePosY},
+            { veloX, veloY}, 
             0.1f, 
             1.0f,
-            (float)((rand() % 25) + 5),
+			"Ball" + to_string(sim.balls.size() + 1),
             { static_cast<unsigned char>(rand() % 256),
               static_cast<unsigned char>(rand() % 256), 
               static_cast<unsigned char>(rand() % 256), 
               255 
             }
+
         
         ));
     }
@@ -173,22 +198,22 @@ void SpawnBall() {
     
 	// ANGLE 0 DEGREES
     if (IsKeyPressed(KEY_ONE)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(0 * DEG2RAD) * speed, (float)-sin(0 * DEG2RAD) * speed }, 0.1f, 1.0f));
+        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(0 * DEG2RAD) * speed, (float)-sin(0 * DEG2RAD) * speed }, 0.1f, 1.0f));
     }
 
     // ANGLE 45 DEGREES
     if (IsKeyPressed(KEY_TWO)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(45 * DEG2RAD) * speed, (float)-sin(45 * DEG2RAD) * speed }, 0.1f, 1.0f));
+        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(45 * DEG2RAD) * speed, (float)-sin(45 * DEG2RAD) * speed }, 0.1f, 1.0f));
     }
 
     // ANGLE 60 DEGREES
     if (IsKeyPressed(KEY_THREE)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(60 * DEG2RAD) * speed, (float)-sin(60 * DEG2RAD) * speed }, 0.1f, 1.0f));
+        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(60 * DEG2RAD) * speed, (float)-sin(60 * DEG2RAD) * speed }, 0.1f, 1.0f));
     }
 
 	// ANGLE 90 DEGREES
     if (IsKeyPressed(KEY_FOUR)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(90 * DEG2RAD) * speed, (float)-sin(90 * DEG2RAD) * speed }, 0.1f, 1.0f));
+        sim.addBall(pMain({ positionX, GetScreenHeight() - positionY }, { (float)cos(90 * DEG2RAD) * speed, (float)-sin(90 * DEG2RAD) * speed }, 0.1f, 1.0f));
     }
 }
 
@@ -218,7 +243,7 @@ void Draw()
 
     //Drawing the Circle
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
-    /* for (auto& ball : sim.balls) {
+    /*for (auto& ball : sim.balls) {
         DrawCircleV(ball.position, ball.radius, ball.randomColor);
 		DrawText(ball.name.c_str(), ball.position.x, ball.position.y , ball.radius * 2, LIGHTGRAY);
 		DrawLineEx(ball.position, ball.position + ball.velocity, 1, ball.randomColor);

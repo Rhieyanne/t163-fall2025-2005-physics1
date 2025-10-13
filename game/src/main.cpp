@@ -18,15 +18,11 @@ float positionY = 200;
 float time;
 float dt;
 
-pWorld sim;
-
-
 // Notes on Polymorphism
 //We can use void draw() override, or we can use virtual void draw() = 0; pure virtual function
 // Overriding keyword makes sure we are actually overriding a base class function
 // if you are not, the compiler will throw an error
 // [Virtual on Main class], override on derived class
-
 struct pMain // Parent Class
 {
     // Vector2 
@@ -75,6 +71,7 @@ struct pMain // Parent Class
 
 };
 
+
 class pBox : public pMain
 {
 public:
@@ -89,40 +86,38 @@ public:
     void draw() override // Override the parent draw function
     {
         DrawCircleV(position, radius, color);
-        DrawText(name.c_str(), position.x, position.y, radius * 2, LIGHTGRAY);
+        DrawText(name.c_str(), (int)position.x, (int)position.y, (int)(radius * 2), LIGHTGRAY);
         DrawLineEx(position, position + velocity, 1, color);
 	}
 };
-
 class pWorld {
 private:
-	unsigned int objCount = 0;
+    unsigned int objCount = 0;
 public:
     // Vector2
-	Vector2 gravityAcceleration;
-	vector<pMain*> objects; // All objects in physics world
+    Vector2 gravityAcceleration;
+    vector<pMain*> objects; // All objects in physics world
     vector<pBox> boxes;
-	vector<pCircle> circles;
+    vector<pCircle> circles;
 
-	// Constructor
+    // Constructor
     pWorld(Vector2 gravityAcceleration = { 0, 0 }) : gravityAcceleration(gravityAcceleration) {};
 
     // Functions
     void addObject(pMain* obj) {
-		obj->name = to_string(objCount);
+        obj->name = to_string(objCount);
         objects.push_back(obj);
         objCount++;
     }
 
     void updateObject() {
-        for (int i = 0; i < sim.objects.size(); i++) {
-			pMain* obj = sim.objects[i];
+        for (auto* obj : objects) {
             obj->velocity.x += gravityAcceleration.x * dt;
             obj->velocity.y += gravityAcceleration.y * dt;
             obj->position.x += obj->velocity.x * dt;
             obj->position.y += obj->velocity.y * dt;
 
-			//OG CODE FOR REFERENCE
+            //OG CODE FOR REFERENCE
             //Acceleration changes velocity over time.
             // accel = delta velocity / time
             // delta velocity = accel * time
@@ -132,9 +127,10 @@ public:
             // Velocity = dispalcement / time
             // Displacement = velocity * time 
             // OG CODE: position += velocity * dt;
-		}
+        }
     }
 };
+pWorld sim;
 
 void cleanupWorld() {
     for (int i = 0; i < sim.objects.size(); i++) {
@@ -145,7 +141,6 @@ void cleanupWorld() {
             || obj->position.x < 0 ) {
             sim.objects.erase(sim.objects.begin() + i); // Remove from vector
 			--i; // Adjust index after erasing
-
 		}
 	}
 }
@@ -163,15 +158,12 @@ void update()
 		newCircle->position = { positionX, GetScreenHeight() - positionY };
 		newCircle->velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 		newCircle->radius = (float)(rand() % 20 + 10);
-        newCircle->color = { static_cast<unsigned char>(rand() % 256),
-                             static_cast<unsigned char>(rand() % 256),
-                             static_cast<unsigned char>(rand() % 256),
-							 255 };
+        newCircle->color = { static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),255 };
         sim.addObject(newCircle); 
     }
 }
 
-// Spawn Ball Function
+
 // Draw Function
 void Draw()
 {
@@ -221,12 +213,10 @@ void Draw()
 int main() {
     InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");
     SetTargetFPS(TARGET_FPS);
-
     while (!WindowShouldClose()) {
-        sim.updateObject();
+        update();
         Draw();
     }
-
     CloseWindow();
     return 0;
 }

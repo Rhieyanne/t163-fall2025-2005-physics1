@@ -137,7 +137,7 @@ void SpawnBall() {
 	}
 
 	// Holding down the space bar continuously spawns balls
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsKeyPressed(KEY_SPACE)) {
         sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
 	}
 
@@ -192,6 +192,7 @@ void Draw()
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
     for (auto& ball : sim.balls) {
         DrawCircleV(ball.position, ball.radius, ball.randomColor);
+		DrawText(ball.name.c_str(), ball.position.x, ball.position.y , ball.radius * 2, LIGHTGRAY);
 		DrawLineEx(ball.position, ball.position + ball.velocity, 1, ball.randomColor);
     }
 

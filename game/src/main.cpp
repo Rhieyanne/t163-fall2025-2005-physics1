@@ -15,9 +15,6 @@ float speed = 100;
 float angle = 30;
 float positionX = 200;
 float positionY = 200;
-float prePosY = GetScreenHeight() - positionY;
-float veloX = (float)cos(angle * DEG2RAD) * speed;
-float veloY = (float)-sin(angle * DEG2RAD) * speed;
 float time;
 float dt;
 
@@ -147,7 +144,7 @@ void cleanupWorld() {
 			|| obj->position.x > GetScreenWidth()
             || obj->position.x < 0 ) {
             sim.objects.erase(sim.objects.begin() + i); // Remove from vector
-			i--; // Adjust index after erasing
+			--i; // Adjust index after erasing
 
 		}
 	}
@@ -165,31 +162,14 @@ void update()
 		pCircle* newCircle = new pCircle(); // New keyword allocates memory on the heap (as opposed to the stack, where the data will be lost on exisiting scope)
 		newCircle->position = { positionX, GetScreenHeight() - positionY };
 		newCircle->velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
-        newCircle->radius;
-        newCircle->color;
+		newCircle->radius = (float)(rand() % 20 + 10);
+        newCircle->color = { static_cast<unsigned char>(rand() % 256),
+                             static_cast<unsigned char>(rand() % 256),
+                             static_cast<unsigned char>(rand() % 256),
+							 255 };
         sim.addObject(newCircle); 
     }
 }
-
-
-
-
-void spawnObject() {
-    if (IsKeyPressed(KEY_SPACE)) {
-        sim.addObject(new pMain(
-            { positionX, GetScreenHeight() - positionY },
-            { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed },
-            0.1f,
-            1.0f,
-            "Object" + to_string(sim.objects.size() + 1),
-            { static_cast<unsigned char>(rand() % 256),
-              static_cast<unsigned char>(rand() % 256),
-              static_cast<unsigned char>(rand() % 256),
-              255 }
-        ));
-    };
-};
-
 
 // Spawn Ball Function
 // Draw Function
@@ -230,7 +210,8 @@ void Draw()
 
     for (int i = 0; i < sim.objects.size(); i++)
     {
-        sim.objects[i]->draw();
+		pMain* obj = sim.objects[i];
+        obj->draw();
     }
     //STEP4: END DRAWING
     EndDrawing();
@@ -242,7 +223,6 @@ int main() {
     SetTargetFPS(TARGET_FPS);
 
     while (!WindowShouldClose()) {
-        spawnObject();
         sim.updateObject();
         Draw();
     }

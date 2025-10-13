@@ -4,6 +4,7 @@
 #include "raygui.h"
 #include "game.h"
 #include <vector>
+#include <string>
 using namespace std;
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
@@ -19,9 +20,23 @@ struct PhysicsBody {
     Vector2 position;
     Vector2 velocity;
     float drag;
-    float mass;
+    float mass = 1; // in kg
+    float radius = 15; // circle radius in pixels
+	string name = "Ball";
 
-    PhysicsBody(Vector2 position = { 0, 0 }, Vector2 velocity = { 0, 0 }, float drag = 0.1f, float mass = 1.0f) : position(position), velocity(velocity), drag(drag), mass(mass) {}
+	// Color randomColor = {rand() % 256, rand() % 256, rand() % 256, 255};
+    PhysicsBody(
+        Vector2 position = { 0, 0 },
+        Vector2 velocity = { 0, 0 },
+        float drag = 0.1f,
+        float mass = 1.0f,
+        float radius = (rand() % 25) + 5) :
+
+        position(position), 
+        velocity(velocity),
+        drag(drag), 
+        mass(mass),
+        radius(radius) {}
 };
 
 // PhysicsSim Class
@@ -32,13 +47,25 @@ public:
     float time;
     Vector2 gravityAcceleration;
     vector<PhysicsBody> balls;
+    Color randomColor;
+
+    PhysicsSim(
+        float dt,
+        float time,
+        Vector2 gravityAcceleration = { 0, 0 },
+        Color randomColor = { rand() % 256, rand() % 256, rand() % 256, 255 }) :
 
 
-    PhysicsSim(float dt, float time, Vector2 gravityAcceleration = { 0, 0 }) : dt(dt), time(time), gravityAcceleration(gravityAcceleration) {}
+        dt(dt),
+        time(time),
+        gravityAcceleration(gravityAcceleration),
+        randomColor(randomColor) {};
+
+
     // FUNCTIONS
 
     //ADD BALL
-    void addBall(const PhysicsBody& ball) { balls.push_back(ball); }
+    void addBall(PhysicsBody ball) { balls.push_back(ball); }
     //CLEAR BALL
     void clearBalls() { balls.clear(); }
     //UPDATE BALL
@@ -134,6 +161,7 @@ void Draw()
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
     for (auto& ball : sim.balls) {
         DrawCircleV(ball.position, 10, BLUE);
+		DrawLineEx(position, position + velocity, 3, RED);
     }
 
     DrawLineEx(startPos, startPos + velocity, 3, RED);

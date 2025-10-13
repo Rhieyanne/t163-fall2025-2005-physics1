@@ -191,7 +191,7 @@ void Draw()
     //Drawing the Circle
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
     for (auto& ball : sim.balls) {
-        DrawCircleV(ball.position, 10, ball.randomColor);
+        DrawCircleV(ball.position, ball.mass, ball.randomColor);
 		DrawLineEx(ball.position, ball.position + ball.velocity, 1, ball.randomColor);
     }
 

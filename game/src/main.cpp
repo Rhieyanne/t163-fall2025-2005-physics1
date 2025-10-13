@@ -59,7 +59,11 @@ public:
         float dt,
         float time,
         Vector2 gravityAcceleration = { 0, 0 },
-        Color randomColor = { static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256, 255) }) :
+        Color randomColor = { 
+        static_cast<unsigned char>(rand() % 256), 
+        static_cast<unsigned char>(rand() % 256),
+        static_cast<unsigned char>(rand() % 256), 
+        255 }) :
         // https://stackoverflow.com/questions/60580647/narrowing-conversion-from-int-to-unsigned-char
 
         dt(dt),
@@ -109,7 +113,21 @@ PhysicsSim sim(1.0f / TARGET_FPS, 0, { 0, 100.0f });
 // Spawn Ball Function
 void SpawnBall() {
     if (IsKeyPressed(KEY_SPACE)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f, { static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256, 255) }));
+        //sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f, { static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256), static_cast<unsigned char>(rand() % 256, 255) }));
+        sim.addBall(PhysicsBody(
+			{ positionX, GetScreenHeight() - positionY }, 
+            { (float)cos(angle * DEG2RAD) * speed, 
+            (float)-sin(angle * DEG2RAD) * speed }, 
+            0.1f, 
+            1.0f,
+            (float)((rand() % 25) + 5),
+            { static_cast<unsigned char>(rand() % 256),
+              static_cast<unsigned char>(rand() % 256), 
+              static_cast<unsigned char>(rand() % 256), 
+              255 
+            }
+        
+        ));
     }
     
 	// Clears all balls when C is pressed

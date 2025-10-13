@@ -23,20 +23,27 @@ struct PhysicsBody {
     float mass = 1; // in kg
     float radius = 15; // circle radius in pixels
 	string name = "Ball";
-
+    Color randomColor;
 	// Color randomColor = {rand() % 256, rand() % 256, rand() % 256, 255};
     PhysicsBody(
         Vector2 position = { 0, 0 },
         Vector2 velocity = { 0, 0 },
         float drag = 0.1f,
         float mass = 1.0f,
-        float radius = (rand() % 25) + 5) :
-
+        float radius = (rand() % 25) + 5,
+        Color randomColor = { static_cast<unsigned char>(rand() % 256),
+              static_cast<unsigned char>(rand() % 256),
+              static_cast<unsigned char>(rand() % 256),
+              255
+        }
+        ):
+        // https://stackoverflow.com/questions/60580647/narrowing-conversion-from-int-to-unsigned-char
         position(position), 
         velocity(velocity),
         drag(drag), 
         mass(mass),
-        radius(radius) {}
+        radius(radius),
+        randomColor(randomColor) {}
 };
 
 // PhysicsSim Class
@@ -49,7 +56,7 @@ public:
     float time;
     Vector2 gravityAcceleration;
     vector<PhysicsBody> balls;
-    Color randomColor;
+   
 
     
 
@@ -58,18 +65,12 @@ public:
     PhysicsSim(
         float dt,
         float time,
-        Vector2 gravityAcceleration = { 0, 0 },
-        Color randomColor = { 
-        static_cast<unsigned char>(rand() % 256), 
-        static_cast<unsigned char>(rand() % 256),
-        static_cast<unsigned char>(rand() % 256), 
-        255 }) :
-        // https://stackoverflow.com/questions/60580647/narrowing-conversion-from-int-to-unsigned-char
+        Vector2 gravityAcceleration = { 0, 0 }) :
+        
 
         dt(dt),
         time(time),
-        gravityAcceleration(gravityAcceleration),
-        randomColor(randomColor) {};
+        gravityAcceleration(gravityAcceleration){};
 
 
     // FUNCTIONS

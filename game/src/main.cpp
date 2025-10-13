@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 using namespace std;
+
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
 // Default Global Values
@@ -15,13 +16,17 @@ float angle = 30;
 float positionX = 200;
 float positionY = 200;
 
+// Notes on Polymorphism
+//We can use void draw() override, or we can use virtual void draw() = 0; pure virtual function
+// Overriding keyword makes sure we are actually overriding a base class function
+// if you are not, the compiler will throw an error
+// [Virtual on Main class], override on derived class
 // PhysicsBody Struct
-struct PhysicsBody { 
+/*struct PhysicsBody {
     Vector2 position;
     Vector2 velocity;
     float drag;
     float mass = 1; // in kg
-    float radius = 15; // circle radius in pixels
 	string name = "Ball";
     Color randomColor;
 	// Color randomColor = {rand() % 256, rand() % 256, rand() % 256, 255};
@@ -44,8 +49,31 @@ struct PhysicsBody {
         mass(mass),
         radius(radius),
         randomColor(randomColor) {}
+};*/
+
+struct pMain // Parent Class
+{
+	Vector2 position;
+	Vector2 velocity;
+}
+
+
+class PhysicsBox : public PhysicsBox
+{
+public:
+	Vector2 position;
+	Vector2 velocity;
+	Vector2 Size; // x width, y height
+    float mass = 1;
+	string name = "Box";
+	Color color = RED;
 };
 
+class PhysicsCircle : public PhysicsBox
+{
+public:
+	float radius = 15;
+};
 // PhysicsSim Class
 
 class PhysicsSim {
@@ -56,7 +84,7 @@ public:
     float time;
     Vector2 gravityAcceleration;
     vector<PhysicsBody> balls;
-   
+	vector<PhysicsBox> boxes;
 
     
 
@@ -137,9 +165,9 @@ void SpawnBall() {
 	}
 
 	// Holding down the space bar continuously spawns balls
-    if (IsKeyPressed(KEY_SPACE)) {
-        sim.addBall(PhysicsBody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
-	}
+    /*if (IsKeyPressed(KEY_SPACE)) {
+        sim.addBall(Physicsody({ positionX, GetScreenHeight() - positionY }, { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed }, 0.1f, 1.0f));
+	}*/
 
     // Now to do the angles and different parameters presets
     
@@ -190,12 +218,14 @@ void Draw()
 
     //Drawing the Circle
     //void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
-    for (auto& ball : sim.balls) {
+    /* for (auto& ball : sim.balls) {
         DrawCircleV(ball.position, ball.radius, ball.randomColor);
 		DrawText(ball.name.c_str(), ball.position.x, ball.position.y , ball.radius * 2, LIGHTGRAY);
 		DrawLineEx(ball.position, ball.position + ball.velocity, 1, ball.randomColor);
-    }
-
+    }*/ //We want each child to have their own drawing solution
+	//Through the magic of polymorphism, we can place multiple types of objects in world.oject (sim.balls) Circle, Box, Halfspace etc
+	// then we call the parent function draw(), we should get the derived class behavior specific to what the object actually is
+	// example, Circle.draw() should call the Circle draw function, Box.draw() should call the Box draw function
     DrawLineEx(startPos, startPos + velocity, 3, RED);
 
     //STEP4: END DRAWING

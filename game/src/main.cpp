@@ -90,6 +90,18 @@ public:
         DrawLineEx(position, position + velocity, 1, color);
 	}
 };
+bool CircleOverlap(pCircle* circleA, pCircle* circleB)
+{
+	Vector2 displacementFromAtoB = Vector2Subtract(circleB->position, circleA->position); // Same thing asw circleB.position - circleA.position
+    float distance = Vector2Length(displacementFromAtoB); // Use pythagorean thoreom to get magnitude of displacement vector betwen circles
+	float sumOfRadii = circleA->radius + circleB->radius;
+    if (sumOfRadii > distance)
+    {
+        return true; // Overlapping
+    }
+    else
+        return false;
+}
 class pWorld {
 private:
     unsigned int objCount = 0;
@@ -128,7 +140,35 @@ public:
             // Displacement = velocity * time 
             // OG CODE: position += velocity * dt;
         }
+		checkCollision();
     }
+	void checkCollision() // Assuming all objects in objects are circles for now
+		// Check each object against every other object
+    {
+        for (int i = 0; i < objects.size(); i++) {
+            for (int j = 0; j < objects.size(); j++) { // Start checking from the next object, no need to check previous objects again
+
+				if (i == j) continue; // Don't check against yourself
+                pMain* objpointerA = objects[i];
+                pCircle* circlePointerA = (pCircle*)objpointerA;
+
+                pMain* objpointerB = objects[j];
+                pCircle* circlePointerB = (pCircle*)objpointerA;
+
+                if (CircleOverlap(circlePointerA, circlePointerB))
+                {
+                    objpointerA->color = RED;
+                    objpointerB->color = RED;
+                }
+                else
+                { 
+                    objpointerA->color = GREEN;
+                    objpointerB->color = GREEN;
+                }
+
+			}
+        }
+	}
 };
 pWorld sim;
 
@@ -139,7 +179,10 @@ void cleanupWorld() {
 			|| obj->position.y < 0
 			|| obj->position.x > GetScreenWidth()
             || obj->position.x < 0 ) {
-            sim.objects.erase(sim.objects.begin() + i); // Remove from vector
+			auto iterator = sim.objects.begin() + i;
+			pMain* pointerTopMain = *iterator;
+			delete pointerTopMain; // Free memory
+            sim.objects.erase(iterator); // Remove from vector
 			--i; // Adjust index after erasing
 		}
 	}

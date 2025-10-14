@@ -145,28 +145,33 @@ public:
 	void checkCollision() // Assuming all objects in objects are circles for now
 		// Check each object against every other object
     {
+		vector<int> collidedObjects(objects.size(), 0); 
         for (int i = 0; i < objects.size(); i++) {
-            for (int j = 0; j < objects.size(); j++) { // Start checking from the next object, no need to check previous objects again
+            pMain* objpointerA = objects[i];
+            pCircle* circlePointerA = (pCircle*)objpointerA;
 
-				if (i == j) continue; // Don't check against yourself
-                pMain* objpointerA = objects[i];
-                pCircle* circlePointerA = (pCircle*)objpointerA;
+
+            for (int j = i + 1; j < objects.size(); j++) { // Start checking from the next object, no need to check previous objects again
 
                 pMain* objpointerB = objects[j];
-                pCircle* circlePointerB = (pCircle*)objpointerA;
+                pCircle* circlePointerB = (pCircle*)objpointerB;
 
                 if (CircleOverlap(circlePointerA, circlePointerB))
                 {
-                    objpointerA->color = RED;
-                    objpointerB->color = RED;
+                    collidedObjects[i]++;
+					collidedObjects[j]++;
                 }
-                else
-                { 
-                    objpointerA->color = GREEN;
-                    objpointerB->color = GREEN;
-                }
-
 			}
+            for (int i = 0; i < collidedObjects.size(); i++)
+            {
+                pMain* objpointerC = objects[i];
+                pCircle* circlePointerC = (pCircle*)objpointerC;
+
+				if (collidedObjects[i] > 0)
+					circlePointerC->color = PURPLE;
+				else
+					circlePointerC->color = GREEN;
+            }
         }
 	}
 };
@@ -201,7 +206,7 @@ void update()
 		newCircle->position = { positionX, GetScreenHeight() - positionY };
 		newCircle->velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
 		newCircle->radius = (float)(rand() % 20 + 10);
-        newCircle->color = { static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),255 };
+        //newCircle->color = { static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),255 };
         sim.addObject(newCircle); 
     }
 }

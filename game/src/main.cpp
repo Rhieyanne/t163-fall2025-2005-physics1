@@ -92,7 +92,7 @@ public:
 };
 bool CircleOverlap(pCircle* circleA, pCircle* circleB)
 {
-	Vector2 displacementFromAtoB = Vector2Subtract(circleB->position, circleA->position); // Same thing asw circleB.position - circleA.position
+	Vector2 displacementFromAtoB = Vector2Subtract(circleB->position, circleA->position); // Same thing as circleB.position - circleA.position
     float distance = Vector2Length(displacementFromAtoB); // Use pythagorean thoreom to get magnitude of displacement vector betwen circles
 	float sumOfRadii = circleA->radius + circleB->radius;
     if (sumOfRadii > distance)

@@ -18,6 +18,12 @@ float positionY = 200;
 float time;
 float dt;
 
+enum ObjectType
+{
+    BOX,
+    CIRCLE,
+    HALFSPACE
+};
 // Notes on Polymorphism
 //We can use void draw() override, or we can use virtual void draw() = 0; pure virtual function
 // Overriding keyword makes sure we are actually overriding a base class function
@@ -25,6 +31,7 @@ float dt;
 // [Virtual on Main class], override on derived class
 struct pMain // Parent Class
 {
+	bool isStatic = false; // If true, object will not move or be affected by forces
     // Vector2 
        Vector2 position;
        Vector2 velocity;
@@ -68,7 +75,8 @@ struct pMain // Parent Class
 		   DrawLineEx(position, position + velocity, 1, color);
        }
        
-
+	   virtual ObjectType Shape() = 0; // pure virtual function to make pMain an abstract class
+	   //It is a declaration that has no definition, and it forces derived classes to provide an implementation for this function.
 };
 
 
@@ -89,12 +97,60 @@ public:
         DrawText(name.c_str(), (int)position.x, (int)position.y, (int)(radius * 2), LIGHTGRAY);
         DrawLineEx(position, position + velocity, 1, color);
 	}
+
+    ObjectType Shape() override
+    {
+        return CIRCLE;
+	}
 };
+
+class pHalfspace : public pMain
+{
+private:
+    float rotation = 0;
+    Vector2 normal = { 0,-1 }; //normal vector represents the direction perpendicular to the surface, pointing away from the halfspace
+    // We always keep normal vectors at a magnitude of 1, so they donte orrientation, but no magnitude
+public:
+    void setRotation(float degrees)
+    {
+        rotation = degrees;
+        normal = Vector2Rotate({ 0,-1 }, rotation * DEG2RAD); // Update normal vector based on rotation
+    }
+
+    float getRotation()
+    {
+        return rotation;
+    }
+
+    Vector2 getNormal()
+    {
+        return normal;
+    }
+
+    void draw() override
+    {
+        // Draw arbitrary line based on position and rotation
+        DrawCircle(position.x, position.y, 8, RED);
+        // Draw normal vector
+        DrawLineEx(position, position + normal * 30, 1, RED);
+
+        // Draw surface line
+        //Rotate function, takes radians. 360 degrees = 2PI radians
+        Vector2 parrellelToSurface = Vector2Rotate(normal, PI * 0.5f);
+        DrawLineEx(position - parrellelToSurface * 4000, position + parrellelToSurface * 4000, 1, RED);
+    }
+
+    ObjectType Shape() override
+    {
+        return HALFSPACE;
+    }
+};
+
 bool CircleOverlap(pCircle* circleA, pCircle* circleB)
 {
-	Vector2 displacementFromAtoB = Vector2Subtract(circleB->position, circleA->position); // Same thing as circleB.position - circleA.position
+    Vector2 displacementFromAtoB = Vector2Subtract(circleB->position, circleA->position); // Same thing as circleB.position - circleA.position
     float distance = Vector2Length(displacementFromAtoB); // Use pythagorean thoreom to get magnitude of displacement vector betwen circles
-	float sumOfRadii = circleA->radius + circleB->radius;
+    float sumOfRadii = circleA->radius + circleB->radius;
     if (sumOfRadii > distance)
     {
         return true; // Overlapping
@@ -102,6 +158,37 @@ bool CircleOverlap(pCircle* circleA, pCircle* circleB)
     else
         return false;
 }
+
+// Returns true if the circle overlaps the halfspace, false otherwise
+bool CircleHalfspaceOverlap(pCircle* circle, pHalfspace* halfspace)
+{
+	//Get a displacement vector FROM the arbitrary point on the halfspace TO the center of the circle
+    Vector2 displacementFromHalfspaceToCircle = Vector2Subtract(circle->position, halfspace->position);
+	// Let D be the DOT PRODUCT of the displacement vector and the halfspace normal vector
+	// IF D < 0, the circle is behind the halfspace (no overlap), IF D >= 0, the circle is in front of the halfspace (potential overlap)
+    // In other words... return (D < radius)
+	// reutrn (Dot(displacement, normal) < radius) 
+	float dot = Vector2DotProduct(displacementFromHalfspaceToCircle, halfspace->getNormal());
+
+    //Vector projection Proj a onto b (both are vectors)      
+    // a dot b * (b/||b||)
+	// Since normal is always normalized, ||b|| = 1
+	// If b is already normalized, we dont have to divide by its magnitude
+	//                  
+	Vector2 projectionDisplacementOntoNormal = halfspace->getNormal() * dot; // If normal is already normalized, we dont need to do the whole equation for vector projection
+    //float distance = Vector2Length(displacementFromHalfspaceToCircle);
+	DrawLineEx(circle->position, circle->position - projectionDisplacementOntoNormal, 1, GRAY);
+    // DRAW LINE FROM CIRCLE TO HALFSPACE
+    //DrawLineEx(circle->position, halfspace->position, 1, GRAY);
+
+    Vector2 midpoint = circle->position - projectionDisplacementOntoNormal * 0.5f;
+    DrawText(TextFormat("Dist: %6.0f", dot), midpoint.x, midpoint.y, 30, GRAY);
+    if (dot < -circle->radius)
+        return false;
+	return true;
+	
+}
+
 class pWorld {
 private:
     unsigned int objCount = 0;
@@ -124,10 +211,14 @@ public:
 
     void updateObject() {
         for (auto* obj : objects) {
+
+			if (obj->isStatic) // Avoid modifying static objects
+                continue; // Skip static objects
             obj->velocity.x += gravityAcceleration.x * dt;
             obj->velocity.y += gravityAcceleration.y * dt;
             obj->position.x += obj->velocity.x * dt;
             obj->position.y += obj->velocity.y * dt;
+
 
             //OG CODE FOR REFERENCE
             //Acceleration changes velocity over time.
@@ -144,38 +235,101 @@ public:
     }
 	void checkCollision() // Assuming all objects in objects are circles for now
 		// Check each object against every other object
-    {
-		vector<int> collidedObjects(objects.size(), 0); 
+    {   
+        vector<bool> collided(objects.size(), false);
         for (int i = 0; i < objects.size(); i++) {
-            pMain* objpointerA = objects[i];
-            pCircle* circlePointerA = (pCircle*)objpointerA;
-
-
             for (int j = i + 1; j < objects.size(); j++) { // Start checking from the next object, no need to check previous objects again
-
+                // Pointers to objects
+                pMain* objpointerA = objects[i];
                 pMain* objpointerB = objects[j];
-                pCircle* circlePointerB = (pCircle*)objpointerB;
-
-                if (CircleOverlap(circlePointerA, circlePointerB))
+                bool didCollide = false;
+                // Ask Objects what shape they are
+                ObjectType shapeofA = objpointerA->Shape();
+                ObjectType shapeofB = objpointerB->Shape();
+                if (shapeofA == CIRCLE && shapeofB == CIRCLE)
                 {
-                    collidedObjects[i]++;
-					collidedObjects[j]++;
+					didCollide = CircleOverlap((pCircle*)objpointerA, (pCircle*)objpointerB);
                 }
-			}
-            for (int i = 0; i < collidedObjects.size(); i++)
-            {
-                pMain* objpointerC = objects[i];
-                pCircle* circlePointerC = (pCircle*)objpointerC;
+                else if (shapeofA == CIRCLE && shapeofB == HALFSPACE)
+                {
+					didCollide = CircleHalfspaceOverlap((pCircle*)objpointerA, (pHalfspace*)objpointerB);
+                }
+                else if (shapeofA == HALFSPACE && shapeofB == CIRCLE)
+                {
+                    didCollide = CircleHalfspaceOverlap((pCircle*)objpointerB, (pHalfspace*)objpointerA);
+                }
 
-				if (collidedObjects[i] > 0)
-					circlePointerC->color = PURPLE;
-				else
-					circlePointerC->color = GREEN;
+                if (didCollide)
+                {
+                    collided[i] = true;
+                    collided[j] = true;
+                }
+            }
+            // Ask Objects what shape they are
+            /*vector<int> collidedObjects(objects.size(), 0);
+            for (int i = 0; i < objects.size(); i++) {
+                pMain* objpointerA = objects[i];
+                ObjectType shapeofA = objpointerA->Shape();
+                if (shapeofA != CIRCLE)
+                    continue; // Skip non-circle objects for now
+                pCircle* circlePointerA = (pCircle*)objpointerA;
+
+
+                for (int j = i + 1; j < objects.size(); j++) { // Start checking from the next object, no need to check previous objects again
+
+                    pMain* objpointerB = objects[j];
+                    ObjectType shapeofB = objpointerB->Shape();
+                    if (shapeofB == CIRCLE)
+                    {
+                        pCircle* circlePointerB = (pCircle*)objpointerB;
+                        if (CircleOverlap(circlePointerA, circlePointerB))
+                        {
+                            collidedObjects[i]++;
+                            collidedObjects[j]++;
+                        }
+                    }
+                    else if (shapeofB == HALFSPACE)
+                    {
+                        pHalfspace* halfspacePointerB = (pHalfspace*)objpointerB;
+                        if (CircleHalfspaceOverlap(circlePointerA, halfspacePointerB))
+                        {
+                            collidedObjects[i]++;
+                        }
+                    }
+                }
+                for (int i = 0; i < collidedObjects.size(); i++)
+                {
+                    pMain* objpointerC = objects[i];
+                    ObjectType shapeofC = objpointerC->Shape();
+                    if (shapeofC != CIRCLE) continue;
+                    pCircle* circlePointerC = (pCircle*)objpointerC;
+
+                    if (collidedObjects[i] > 0)
+                        circlePointerC->color = PURPLE;
+                    else
+                        circlePointerC->color = GREEN;
+                }
+
+                // Lets try to implement halfcircle collision
+
+            }*/
+        }
+        for (int i = 0; i < collided.size(); i++)
+        {
+            if (collided[i])
+            {
+                objects[i]->color = RED;
+            }
+            else
+            {
+                objects[i]->color = GREEN;
             }
         }
 	}
 };
 pWorld sim;
+pHalfspace halfspace;
+
 
 void cleanupWorld() {
     for (int i = 0; i < sim.objects.size(); i++) {
@@ -248,11 +402,22 @@ void Draw()
 	// example, Circle.draw() should call the Circle draw function, Box.draw() should call the Box draw function
     DrawLineEx(startPos, startPos + velocity, 3, RED);
 
+    //Controls for halfspace
+    GuiSliderBar(Rectangle{ 80, 160, 240, 20 }, "HalfspaceX", TextFormat("%.0f", halfspace.position.x), &halfspace.position.x, 0, GetScreenWidth());
+    GuiSliderBar(Rectangle{ 380, 160, 240, 20 }, "HalfspaceY", TextFormat("%.0f", halfspace.position.y), &halfspace.position.y, 0, GetScreenHeight());
+
+	float halfspaceRotation = halfspace.getRotation();
+    GuiSliderBar(Rectangle{ 780, 160, 100, 20 }, "Halfspace Rotation", TextFormat("%.0f", halfspace.getRotation()), &halfspaceRotation, -360,360);
+	halfspace.setRotation(halfspaceRotation);
+
+
     for (int i = 0; i < sim.objects.size(); i++)
     {
 		pMain* obj = sim.objects[i];
         obj->draw();
     }
+
+	halfspace.draw();
     //STEP4: END DRAWING
     EndDrawing();
 }
@@ -261,6 +426,10 @@ void Draw()
 int main() {
     InitWindow(InitialWidth, InitialHeight, "Rhieyanne-Fajardo-101554981");
     SetTargetFPS(TARGET_FPS);
+    halfspace.position = { 500, 900 };
+	halfspace.isStatic = true;
+    sim.addObject(&halfspace); // Add halfspace to simulation for drawing only
+
     while (!WindowShouldClose()) {
         update();
         Draw();

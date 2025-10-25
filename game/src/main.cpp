@@ -84,6 +84,11 @@ class pBox : public pMain
 {
 public:
 	Vector2 Size; // x width, y height
+
+    ObjectType Shape() override
+    {
+        return BOX;
+    }
 };
 
 class pCircle : public pMain

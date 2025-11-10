@@ -164,6 +164,27 @@ bool CircleOverlap(pCircle* circleA, pCircle* circleB)
         return false;
 }
 
+bool CircleCircleCollisionResponse(pCircle* circleA, pCircle* circleB)
+{
+    Vector2 displacementFromAtoB = Vector2Subtract(circleB->position, circleA->position); // Same thing as circleB.position - circleA.position
+    float distance = Vector2Length(displacementFromAtoB); // Use pythagorean thoreom to get magnitude of displacement vector betwen circles
+    float sumOfRadii = circleA->radius + circleB->radius;
+	float overlap = sumOfRadii - distance; // Sum of radii = 5, distance = 10, overlap = -5 (no overlap)
+	
+
+	if (overlap > 0) // if overlap is positive, we have collision
+    {
+        Vector2 normal = displacementFromAtoB / distance; // Normalize displacement vector to get collision normal
+        Vector2 mtv = normal * overlap; // minimum translation vector (to move objects out of collision)
+		circleA->position -= mtv * 0.5f;
+		circleB->position += mtv * 0.5f;
+		return true; // Overlapping
+    }
+    else
+		return false; // Not overlapping
+    
+}
+
 // Returns true if the circle overlaps the halfspace, false otherwise
 bool CircleHalfspaceOverlap(pCircle* circle, pHalfspace* halfspace)
 {
@@ -192,6 +213,29 @@ bool CircleHalfspaceOverlap(pCircle* circle, pHalfspace* halfspace)
         return false;
 	return true;
 	
+}
+
+bool CircleHalfspaceCollisionResponse(pCircle* circle, pHalfspace* halfspace)
+{
+    Vector2 displacementFromHalfspaceToCircle = Vector2Subtract(circle->position, halfspace->position); // Same thing as circleB.position - circleA.position
+	float dot = Vector2DotProduct(displacementFromHalfspaceToCircle, halfspace->getNormal());
+	Vector2 projectionDisplacementOntoNormal = halfspace->getNormal() * dot; // If normal is already normalized, we dont need to do the whole equation for vector projection
+
+	DrawLineEx(circle->position, circle->position - projectionDisplacementOntoNormal, 1, GRAY);
+	Vector2 midpoint = circle->position - projectionDisplacementOntoNormal * 0.5f;
+	DrawText(TextFormat("Dist: %6.0f", dot), midpoint.x, midpoint.y, 30, GRAY); 
+
+	float overlap = circle->radius - dot; // Sum of radii = 5, distance = 10, overlap = -5 (no overlap)
+    if (overlap > 0) // if overlap is positive, we have collision
+    {
+		Vector2 mtv = halfspace->getNormal() * overlap; // minimum translation vector (to move objects out of collision)
+		circle->position += mtv;
+        return true; // Overlapping
+    }
+    else
+		return false; // Not overlapping
+
+
 }
 
 class pWorld {
@@ -253,15 +297,15 @@ public:
                 ObjectType shapeofB = objpointerB->Shape();
                 if (shapeofA == CIRCLE && shapeofB == CIRCLE)
                 {
-					didCollide = CircleOverlap((pCircle*)objpointerA, (pCircle*)objpointerB);
+					didCollide = CircleCircleCollisionResponse((pCircle*)objpointerA, (pCircle*)objpointerB);
                 }
                 else if (shapeofA == CIRCLE && shapeofB == HALFSPACE)
                 {
-					didCollide = CircleHalfspaceOverlap((pCircle*)objpointerA, (pHalfspace*)objpointerB);
+					didCollide = CircleHalfspaceCollisionResponse((pCircle*)objpointerA, (pHalfspace*)objpointerB);
                 }
                 else if (shapeofA == HALFSPACE && shapeofB == CIRCLE)
                 {
-                    didCollide = CircleHalfspaceOverlap((pCircle*)objpointerB, (pHalfspace*)objpointerA);
+                    didCollide = CircleHalfspaceCollisionResponse((pCircle*)objpointerB, (pHalfspace*)objpointerA);
                 }
 
                 if (didCollide)
@@ -334,6 +378,7 @@ public:
 };
 pWorld sim;
 pHalfspace halfspace;
+pHalfspace halfspace2;
 
 
 void cleanupWorld() {
@@ -367,6 +412,16 @@ void update()
 		newCircle->radius = (float)(rand() % 20 + 10);
         //newCircle->color = { static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),255 };
         sim.addObject(newCircle); 
+    }
+
+    if (IsKeyDown(KEY_C))
+    {
+        pCircle* newCircle = new pCircle(); // New keyword allocates memory on the heap (as opposed to the stack, where the data will be lost on exisiting scope)
+        newCircle->position = { positionX, GetScreenHeight() - positionY };
+        newCircle->velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
+        newCircle->radius = (float)(rand() % 20 + 10);
+        //newCircle->color = { static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),255 };
+            sim.addObject(newCircle);
     }
 }
 
@@ -434,6 +489,12 @@ int main() {
     halfspace.position = { 500, 900 };
 	halfspace.isStatic = true;
     sim.addObject(&halfspace); // Add halfspace to simulation for drawing only
+
+	halfspace2.isStatic = true;
+	halfspace2.position = { 600, 900 };
+	halfspace2.setRotation(-20);
+	sim.addObject(&halfspace2);
+
 
     while (!WindowShouldClose()) {
         update();

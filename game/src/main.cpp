@@ -158,6 +158,27 @@ bool CircleOverlap(pCircle* circleA, pCircle* circleB)
     float sumOfRadii = circleA->radius + circleB->radius;
     if (sumOfRadii > distance)
     {
+
+        return true; // Overlapping
+    }
+    else
+        return false;
+}
+
+bool CircleCircleOverlapCollision(pCircle* circleA, pCircle* circleB)
+{
+    Vector2 displacementFromAtoB = Vector2Subtract(circleB->position, circleA->position); // Same thing as circleB.position - circleA.position
+    float distance = Vector2Length(displacementFromAtoB); // Use pythagorean thoreom to get magnitude of displacement vector betwen circles
+    float sumOfRadii = circleA->radius + circleB->radius;
+	float overlap = sumOfRadii - distance;
+   
+
+    if (sumOfRadii > distance)
+    {
+        Vector2 normalAtoB = (displacementFromAtoB / distance);
+        Vector2 mtv = normalAtoB * overlap; // Minimum translation vector to separate circles
+		circleA->position -= mtv * 0.5f; // Move circle A back by half the overlap
+		circleB->position += mtv * 0.5f; // Move circle B forward by half the overlap
         return true; // Overlapping
     }
     else
@@ -193,6 +214,42 @@ bool CircleHalfspaceOverlap(pCircle* circle, pHalfspace* halfspace)
 	return true;
 	
 }
+bool CircleHalfspaceOverlapCollison(pCircle* circle, pHalfspace* halfspace)
+{
+    Vector2 displacementFromHalfspaceToCircle = Vector2Subtract(circle->position, halfspace->position);
+	float dot = Vector2DotProduct(displacementFromHalfspaceToCircle, halfspace->getNormal());
+	Vector2 projectionDisplacementOntoNormal = halfspace->getNormal() * dot; // If normal is already normalized, we dont need to do the whole equation for vector projection
+	float overlap = circle->radius - dot;
+    if (dot < circle->radius)
+    {
+		Vector2 mtv = halfspace->getNormal() * overlap; // Minimum translation vector to separate circle from halfspace
+		circle->position += mtv; // Move circle out of halfspace
+        return true;
+    }
+    else
+		return false;
+	/*/DrawLineEx(circle->position, circle->position - projectionDisplacementOntoNormal, 1, GRAY);
+    // DRAW LINE FROM CIRCLE TO HALFSPACE
+    //DrawLineEx(circle->position, halfspace->position, 1, GRAY);
+
+    Vector2 midpoint = circle->position - projectionDisplacementOntoNormal * 0.5f;
+    DrawText(TextFormat("Dist: %6.0f", dot), midpoint.x, midpoint.y, 30, GRAY);
+    if (dot < -circle->radius)
+        return false;
+	return true;*/
+	
+}
+
+//template<int N = 0>struct _ { auto operator()(auto* t, auto* u)const { return Vector2DotProduct(t->position - u->position, u->getNormal()); }template<auto V>auto operator[](V&& v)const { return v; } }; template<class T, T V = T{} > struct __ { static constexpr T value = V; };
+//bool C(pCircle* c, pHalfspace* h) { return[c, h](auto d) {return d < c->radius ? (__<bool, 1>::value && (c->position += h->getNormal() * (c->radius - d), 1)) : __<bool>::value; }(_<>{} [_<>{}(c, h)] ); }
+
+
+// FgPerp + Fgnormal = 0s
+//Fnormal = -Fgperp
+// FgPara = Fg = FgPerp
+// Ffriction = =fgPara 
+// Function
+
 
 class pWorld {
 private:
@@ -253,15 +310,15 @@ public:
                 ObjectType shapeofB = objpointerB->Shape();
                 if (shapeofA == CIRCLE && shapeofB == CIRCLE)
                 {
-					didCollide = CircleOverlap((pCircle*)objpointerA, (pCircle*)objpointerB);
+					didCollide = CircleCircleOverlapCollision((pCircle*)objpointerA, (pCircle*)objpointerB);
                 }
                 else if (shapeofA == CIRCLE && shapeofB == HALFSPACE)
                 {
-					didCollide = CircleHalfspaceOverlap((pCircle*)objpointerA, (pHalfspace*)objpointerB);
+					didCollide = CircleHalfspaceOverlapCollison((pCircle*)objpointerA, (pHalfspace*)objpointerB);
                 }
                 else if (shapeofA == HALFSPACE && shapeofB == CIRCLE)
                 {
-                    didCollide = CircleHalfspaceOverlap((pCircle*)objpointerB, (pHalfspace*)objpointerA);
+                    didCollide = CircleHalfspaceOverlapCollison((pCircle*)objpointerB, (pHalfspace*)objpointerA);
                 }
 
                 if (didCollide)
@@ -334,6 +391,7 @@ public:
 };
 pWorld sim;
 pHalfspace halfspace;
+pHalfspace halfspace2;
 
 
 void cleanupWorld() {
@@ -367,6 +425,16 @@ void update()
 		newCircle->radius = (float)(rand() % 20 + 10);
         //newCircle->color = { static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),255 };
         sim.addObject(newCircle); 
+    }
+
+    if (IsKeyDown(KEY_SPACE))
+    {
+        pCircle* newCircle = new pCircle(); // New keyword allocates memory on the heap (as opposed to the stack, where the data will be lost on exisiting scope)
+        newCircle->position = { positionX, GetScreenHeight() - positionY };
+        newCircle->velocity = { (float)cos(angle * DEG2RAD) * speed, (float)-sin(angle * DEG2RAD) * speed };
+        newCircle->radius = (float)(rand() % 20 + 10);
+        //newCircle->color = { static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),static_cast<unsigned char>(rand() % 256),255 };
+		sim.addObject(newCircle);
     }
 }
 
@@ -423,6 +491,23 @@ void Draw()
     }
 
 	halfspace.draw();
+
+	Vector2 CirclePos = { 800, 800 };
+	DrawCircleLines(CirclePos.x, CirclePos.y, 50, GREEN);
+    float mass = 0;
+    //Gravity
+    Vector2 ForceGravity = { 100, sim.gravityAcceleration.y * mass };
+	DrawLine(CirclePos.x, CirclePos.y, CirclePos.x + ForceGravity.x, CirclePos.y + ForceGravity.y, RED);
+	// Normal Force
+    // FgPerp
+    Vector2 FgPerp = halfspace.getNormal() * Vector2DotProduct(ForceGravity, halfspace.getNormal());
+	Vector2 FNormal = FgPerp * -1;
+    DrawLine(CirclePos.x, CirclePos.y, CirclePos.x + FNormal.x, CirclePos.y + FNormal.y, GREEN);
+
+	// Friction Force
+	Vector2 FgPara = ForceGravity - FgPerp;
+	Vector2 Ffrticion = FgPara * -1;
+	DrawLine(CirclePos.x, CirclePos.y, CirclePos.x + FgPara.x, CirclePos.y + FgPara.y, ORANGE);
     //STEP4: END DRAWING
     EndDrawing();
 }
@@ -434,6 +519,10 @@ int main() {
     halfspace.position = { 500, 900 };
 	halfspace.isStatic = true;
     sim.addObject(&halfspace); // Add halfspace to simulation for drawing only
+	//halfspace2.position = { 1000, 600 };
+	//halfspace2.isStatic = true;
+ //   halfspace2.setRotation(-40);
+	//sim.addObject(&halfspace2); // Add halfspace to simulation for drawing only
 
     while (!WindowShouldClose()) {
         update();
